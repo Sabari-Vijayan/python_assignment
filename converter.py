@@ -34,10 +34,12 @@ first_number = int(selection())
 print("Choose the base you want to convert into\n")
 second_number = int(selection())
 
-user_number = int(input("What is your number"))
+user_number = (input("What is your number"))
 
 def repeated_divmod(no, divisor):
     
+    no = int(no)
+
     if no==0:
         return []
 
@@ -46,6 +48,8 @@ def repeated_divmod(no, divisor):
 
 def repeated_divmod_hex(no, divisor):
     
+    no = int(no)
+
     if no==0:
         return []
 
@@ -54,17 +58,17 @@ def repeated_divmod_hex(no, divisor):
     if(remainder > 9):
         match remainder:
             case 10:
-                return repeated_divmod_hex(quotient, divisor) + "A"
+                return repeated_divmod_hex(quotient, divisor) + ["A"]
             case 11:
-                return repeated_divmod_hex(quotient, divisor) + "B"
+                return repeated_divmod_hex(quotient, divisor) + ["B"]
             case 12: 
-                return repeated_divmod_hex(quotient, dividor) + "C"
+                return repeated_divmod_hex(quotient, divisor) + ["C"]
             case 13:
-                return repeated_divmod_hex(quotient, divisor) + "D"
+                return repeated_divmod_hex(quotient, divisor) + ["D"]
             case 14:
-                return repeated_divmod_hex(quotient, divisor) + "E"
+                return repeated_divmod_hex(quotient, divisor) + ["E"]
             case 15:
-                return repeated_divmod_hex(quotient, divisor) + "F"
+                return repeated_divmod_hex(quotient, divisor) + ["F"]
 
     return repeated_divmod_hex(quotient, divisor) + [remainder]
 
@@ -77,6 +81,63 @@ def DtoO(no):
 
 def DtoHex(no):
     return "".join(map(str, repeated_divmod_hex(no, 16)))
+
+def AnyToDecimal(no, base):
+    # Ensure it's a string for slicing
+    no = str(no).upper()
+    
+    if not no:
+        return 0
+
+    # For Hex, we need to convert letters back to numbers
+    hex_digits = "0123456789ABCDEF"
+    digit_value = hex_digits.index(no[0]) 
+
+    power = len(no) - 1
+    
+    # Logic: (digit * base^power) + recursive call for rest of string
+    return (digit_value * (base ** power)) + AnyToDecimal(no[1:], base)
+
+def BinarytoOandHex(no, groupbits):
+    if not no:
+        return "0"
+
+    # 1. Ensure 'no' is the string we work with
+    binary_str = str(no)
+
+    # 2. Padding: This MUST happen before the loop
+    remainder = len(binary_str) % groupbits
+    if remainder > 0:
+        binary_str = "0" * (groupbits - remainder) + binary_str
+
+    result = ""
+    hex_digits = "0123456789ABCDEF"
+
+    # 3. Slice the PADDED string
+    for i in range(0, len(binary_str), groupbits):
+        group = binary_str[i : i + groupbits]
+        
+        # Convert group to a decimal value
+        val = AnyToDecimal(group, 2)
+
+        # 4. Map the value to the correct Hex/Octal character
+        # (This handles 10 -> 'A', 11 -> 'B', etc.)
+        result += hex_digits[val]
+
+    return result
+
+def OtoBandHex(no, base):
+
+    decimal_value = AnyToDecimal(no, base)
+    return DtoB(decimal_value)
+
+def OtoHex(no):
+    decimal = AnyToDecimal(no, 8)
+    return DtoHex(decimal)
+
+def HextoO(no):
+    decimal = AnyToDecimal(no, 2)
+    return DtoO (decimal)
 
 def convert(user, output, no):
 
@@ -93,6 +154,42 @@ def convert(user, output, no):
         case(1,4):
             print("\nConverting from Decimal to Hexa-Decimal\n")
             print(DtoHex(no))
+
+        case(2,1):
+            print("\nConverting from Binary to Decimal\n")
+            print(AnyToDecimal((str(no)), 2))
+
+        case(2,3):
+            print("\nConverting from Binary to Octal\n")
+            print(BinarytoOandHex(no, 3))
+
+        case(2,4):
+            print("\nConverting from Binary to Hexa-Decimal\n")
+            print(BinarytoOandHex(no, 4))
+
+        case(3,1):
+            print("\nConverting from Octal to Decimal\n")
+            print(AnyToDecimal((str(no)), 8))
+
+        case(3,2):
+            print("\nConverting from Octal to Binary\n")
+            print(OtoBandHex((str(no)), 8))
+
+        case(3,4):
+            print("\nConverting from Octal to Hexa-Decimal\n")
+            print(OtoHex((str(no))))
+
+        case(4,1):
+            print("\nConverting from Hexa-Decimal to Decimal\n")
+            print(AnyToDecimal((str(no)), 16))
+
+        case(4,2):
+            print("\nConverting from Hexa-Decimal to Binary\n")
+            print(OtoBandHex((str(no)), 16))
+
+        case(4,3):
+            print("\nConverting from Hexa-Decimal to Octal\n")
+            print(HextoO(no))
 
         case _:
             print("\nError\n")
